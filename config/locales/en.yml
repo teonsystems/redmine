@@ -680,6 +680,7 @@ en:
   label_today: today
   label_all_time: all time
   label_yesterday: yesterday
+  label_next_week: next week
   label_this_week: this week
   label_last_week: last week
   label_last_n_weeks: "last %{count} weeks"

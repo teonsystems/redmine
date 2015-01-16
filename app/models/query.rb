@@ -187,6 +187,7 @@ class Query < ActiveRecord::Base
     "t+"  => :label_in,
     "t"   => :label_today,
     "ld"  => :label_yesterday,
+    "nw"  => :label_next_week,
     "w"   => :label_this_week,
     "lw"  => :label_last_week,
     "l2w" => [:label_last_n_weeks, {:count => 2}],
@@ -210,8 +211,8 @@ class Query < ActiveRecord::Base
     :list_status => [ "o", "=", "!", "c", "*" ],
     :list_optional => [ "=", "!", "!*", "*" ],
     :list_subprojects => [ "*", "!*", "=" ],
-    :date => [ "=", ">=", "<=", "><", "<t+", ">t+", "><t+", "t+", "t", "ld", "w", "lw", "l2w", "m", "lm", "y", ">t-", "<t-", "><t-", "t-", "!*", "*" ],
-    :date_past => [ "=", ">=", "<=", "><", ">t-", "<t-", "><t-", "t-", "t", "ld", "w", "lw", "l2w", "m", "lm", "y", "!*", "*" ],
+    :date => [ "=", ">=", "<=", "><", "<t+", ">t+", "><t+", "t+", "t", "ld", "nw", "w", "lw", "l2w", "m", "lm", "y", ">t-", "<t-", "><t-", "t-", "!*", "*" ],
+    :date_past => [ "=", ">=", "<=", "><", ">t-", "<t-", "><t-", "t-", "t", "ld", "nw", "w", "lw", "l2w", "m", "lm", "y", "!*", "*" ],
     :string => [ "=", "~", "!", "!~", "!*", "*" ],
     :text => [  "~", "!~", "!*", "*" ],
     :integer => [ "=", ">=", "<=", "><", "!*", "*" ],
@@ -277,7 +278,7 @@ class Query < ActiveRecord::Base
           # filter requires one or more values
           (values_for(field) and !values_for(field).first.blank?) or
           # filter doesn't require any value
-          ["o", "c", "!*", "*", "t", "ld", "w", "lw", "l2w", "m", "lm", "y"].include? operator_for(field)
+          ["o", "c", "!*", "*", "t", "ld", "nw", "w", "lw", "l2w", "m", "lm", "y"].include? operator_for(field)
     end if filters
   end
 
@@ -745,6 +746,12 @@ class Query < ActiveRecord::Base
     when "ld"
       # = yesterday
       sql = relative_date_clause(db_table, db_field, -1, -1)
+    when "nw"
+      # = next week
+      first_day_of_week = l(:general_first_day_of_week).to_i
+      day_of_week = Date.today.cwday
+      days_ago = (day_of_week >= first_day_of_week ? day_of_week - first_day_of_week : day_of_week + 7 - first_day_of_week)
+      sql = relative_date_clause(db_table, db_field, - days_ago + 7, - days_ago + 6 + 7)
     when "w"
       # = this week
       first_day_of_week = l(:general_first_day_of_week).to_i

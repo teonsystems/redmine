@@ -266,6 +266,7 @@ function toggleOperator(field) {
     case "*":
     case "t":
     case "ld":
+    case "nw":
     case "w":
     case "lw":
     case "l2w":
